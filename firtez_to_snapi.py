@@ -21,10 +21,16 @@ atmout[0,:,:,:] = atmin.tau
 atmout[1,:,:,:] = atmin.z * 1E5
 atmout[2,:,:,:] = atmin.tem
 atmout[3,:,:,:] = atmin.pg
+atmout[4,:,:,:] = atmout[3,:,:,:] * 0.05
 atmout[9,:,:,:] = atmin.vz
 
+# Polish temperatures
+
+#smallT = np.where(atmout[2] < 3200.0)
+#atmout[2,smallT] = 3200.0
+
 B_mag = np.sqrt(atmin.bz**2.0 + atmin.bx**2.0 + atmin.by[:,:,:]**2.0)
-theta = np.arccos(atmin.vz/(B_mag+0.1)) # make sure it's not dividing by zero
+theta = np.arccos(atmin.bz/(B_mag+0.1)) # make sure it's not dividing by zero
 phi   = np.arctan(atmin.by / atmin.bx)
 
 atmout[7,:,:,:] = B_mag
