@@ -13,8 +13,12 @@ from scipy.io import FortranFile
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as pl
 from matplotlib import ticker
-pl.ion()
+#pl.ion()
 #
+#pl.rcParams.update({'font.size':15})
+#pl.rcParams.update({'text.usetex':False})
+#pl.rcParams['xtick.minor.visible'] = False
+#pl.rcParams['ytick.minor.visible'] = False
 #
 import warnings
 warnings.filterwarnings('ignore')
@@ -2728,7 +2732,8 @@ def write_beta_atom(fname, beta_low, beta_upp, fmt_type=np.float32):
     return np.nan
           
   # FIRST, WE WRITE A FIRST RECORD WITH THE MANDATORY DATA:
-  towrite = np.zeros(4, dtype=fmt_type)
+  #towrite = np.zeros(4, dtype=fmt_type)
+  towrite = np.zeros(4, dtype=np.int32)
   
   towrite[0] = nx1
   towrite[1] = ny1
@@ -2739,7 +2744,7 @@ def write_beta_atom(fname, beta_low, beta_upp, fmt_type=np.float32):
 
   #OPEN WRITING FILE:
   f=FortranFile(fname,'w')
-  f.write_record(np.float32(towrite))
+  f.write_record(np.int32(towrite))
   #         SET OF DATA:
   f.write_record(np.float32(beta_low))
   f.write_record(np.float32(beta_upp))
