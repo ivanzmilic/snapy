@@ -106,15 +106,8 @@ for l in range(0, nlines):
 	betas[l,0,:,:,:] = dc[:,:,:, indexln[l]]
 	betas[l,1,:,:,:] = dc[:,:,:, indexun[l]]
 
-	# Bracket departure coefficients between 1E-3 and 1E3
 
-	small = np.where(betas < 1E-3)
-	betas[small] = 1E-3
-
-	big = np.where(betas > 1E3)
-	betas[big] = 1E3
-
-for l in range(0, nlines):
+for l in range(0, 0):
 
 	for i in range(0,1):
 		for d in range(0,NZ):
@@ -164,11 +157,12 @@ for l in range(0, nlines):
 
 print("info::test line : ", betas.shape)
 
-small = np.where(betas < 1E-3)
-betas[small] = 1E-3
+# OK THIS DOES NOT WORK PROPERLY
+#small = np.where(betas < 1E-3)
+#betas[small] = 1E-3
 
-big = np.where(betas > 1E3)
-betas[big] = 1E3
+#big = np.where(betas > 1E3)
+#betas[big] = 1E3
 
 for l in range(0,nlines):
 
