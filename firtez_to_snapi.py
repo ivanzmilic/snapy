@@ -5,7 +5,8 @@ import sys
 import pyana
 
 
-# Transforms a single atmospheric cube from cobold h5py format into f0 (pyana) snapi format
+# Transforms a single atmospheric cube from firtez-dz format in to snapi format
+# mostly used to calculate departure coefficients for JM
 
 ffile = sys.argv[1]
 
@@ -29,7 +30,7 @@ atmout[9,:,:,:] = atmin.vz
 #smallT = np.where(atmout[2] < 3200.0)
 #atmout[2,smallT] = 3200.0
 
-B_mag = np.sqrt(atmin.bz**2.0 + atmin.bx**2.0 + atmin.by[:,:,:]**2.0)
+B_mag = np.sqrt(atmin.bz**2.0 + atmin.bx**2.0 + atmin.by**2.0)
 theta = np.arccos(atmin.bz/(B_mag+0.1)) # make sure it's not dividing by zero
 phi   = np.arctan(atmin.by / atmin.bx)
 
