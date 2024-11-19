@@ -38,4 +38,14 @@ atmout[7,:,:,:] = B_mag
 atmout[10,:,:,:] = theta
 atmout[11,:,:,:] = phi
 
+# Gonna smooth out some stuff: 
+from scipy.ndimage import gaussian_filter
+
+atmout[3] = np.log10(atmout[3])
+for i in range(2,12):
+	atmout[i] = gaussian_filter(atmout[i],(1,1,1))
+
+atmout[9,:,:,:] = 0.0
+atmout[3] = 10.0 ** atmout[3]
+
 pyana.fzwrite(sys.argv[2],atmout[:,:,:,::-1],0,'temp')
