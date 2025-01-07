@@ -151,8 +151,8 @@ elif (type=='muramt'):
 	atmout[4,:,:,:] = p * 0.05
 	atmout[9,:,:,:] = vz
 
-	Bz = snap.Bx[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
-	Bx = snap.By[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+	Bz = snap.By[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+	Bx = snap.Bx[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
 	By = snap.Bz[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
 	
 	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0) * np.sqrt(4.0*np.pi)
