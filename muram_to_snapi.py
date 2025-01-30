@@ -115,3 +115,57 @@ elif (type=='muram'):
 	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
+<<<<<<< HEAD
+=======
+
+elif (type=='muramt'):
+
+	# Transposed in a different way to "default one" NX, NZ, NY
+
+	snap=mio.MuramSnap(path,n_iter)
+
+	T = snap.Temp.transpose(0,2,1)
+	
+	print ("info::muram_binary_loader::the original dimensions are: ", T.shape)
+
+	NX, NY, NZ = T.shape
+	
+	print ("info :: original dimensions are: ", NX, NY, NZ)
+
+	T = snap.Temp[xmin:xmax:skip,zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+
+	NX, NY, NZ = T.shape
+	print ("info :: output dimensions are: ", NX, NY, NZ)
+
+	atmout = np.zeros([12,NX,NY,NZ])
+	Tc = np.copy(T)
+	Tc[np.where(T<3200.0)] = 3200.0
+	#Tc[np.where(T>50000.0)] = 50000.0
+	z = np.arange(zmax-zmin) * 16E5
+	tau = np.linspace(-6,2,NZ)
+	p = snap.Pres[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+	vz = snap.vy[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+
+	atmout[0,:,:,:] = tau[None, None, :]
+	atmout[1,:,:,:] = z[None, None, :]
+	atmout[2,:,:,:] = Tc
+	atmout[3,:,:,:] = p
+	atmout[4,:,:,:] = p * 0.05
+	atmout[9,:,:,:] = vz
+
+	Bz = snap.By[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+	Bx = snap.Bx[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+	By = snap.Bz[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+	
+	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0) * np.sqrt(4.0*np.pi)
+	theta = np.arccos(Bz/(B+0.001))
+	phi = np.arctan(By/Bx)
+
+	atmout[7,:,:,:] = B
+	atmout[10,:,:,:] = theta
+	atmout[11,:,:,:] = phi
+
+	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
+
+	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
+>>>>>>> b27c7965e979557925d3b55ae87f6e73463eef8d
