@@ -8,7 +8,7 @@ import sys
 
 cobfile = sys.argv[1]
 
-atmin = fits.open(cobfile)[0].data[:,:,:768,:768]
+atmin = fits.open(cobfile)[0].data[:,:,:,:]
 
 NP, NZ, NX, NY = atmin.shape
 

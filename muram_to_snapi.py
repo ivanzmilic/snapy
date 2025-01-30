@@ -63,7 +63,7 @@ if (type=='muramsub'):
 	atmout[10,:,:,:] = theta
 	atmout[11,:,:,:] = phi
 
-	outputname = sys.argv[10] + '_' + sys.argv[2]+ '.f0'
+	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')
 
