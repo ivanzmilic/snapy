@@ -63,7 +63,7 @@ if (type=='muramsub'):
 	atmout[10,:,:,:] = theta
 	atmout[11,:,:,:] = phi
 
-	outputname = sys.argv[10] + '_' + sys.argv[2]+ '.f0'
+	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')
 
@@ -115,6 +115,8 @@ elif (type=='muram'):
 	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
+<<<<<<< HEAD
+=======
 
 elif (type=='muramt'):
 
@@ -166,3 +168,4 @@ elif (type=='muramt'):
 	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
+>>>>>>> b27c7965e979557925d3b55ae87f6e73463eef8d
