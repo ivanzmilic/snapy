@@ -51,13 +51,13 @@ if (type=='muramsub'):
 	atmout[4,:,:,:] = p * 0.05
 	atmout[9,:,:,:] = vz
 
-	Bz = snap.Bx[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
-	Bx = snap.By[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
-	By = snap.Bz[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
+	Bz = snap.Bx[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0) * np.sqrt(4.0*np.pi)
+	Bx = snap.By[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0) * np.sqrt(4.0*np.pi)
+	By = snap.Bz[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0) * np.sqrt(4.0*np.pi)
 	
-	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0) * np.sqrt(4.0*np.pi)
+	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0)
 	theta = np.arccos(Bz/(B+0.001))
-	phi = np.arctan(By/Bx)
+	phi = np.arctan2(By,Bx)
 
 	atmout[7,:,:,:] = B
 	atmout[10,:,:,:] = theta
@@ -100,13 +100,13 @@ elif (type=='muram'):
 	atmout[4,:,:,:] = p * 0.05
 	atmout[9,:,:,:] = vz
 
-	Bz = snap.Bx[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
-	Bx = snap.By[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
-	By = snap.Bz[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
+	Bz = snap.Bx[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0) * np.sqrt(4.0*np.pi)
+	Bx = snap.By[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0) * np.sqrt(4.0*np.pi)
+	By = snap.Bz[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0) * np.sqrt(4.0*np.pi)
 	
-	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0) * np.sqrt(4.0*np.pi)
+	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0)
 	theta = np.arccos(Bz/(B+0.001))
-	phi = np.arctan(By/Bx)
+	phi = np.arctan2(By,Bx)
 
 	atmout[7,:,:,:] = B
 	atmout[10,:,:,:] = theta
@@ -115,8 +115,7 @@ elif (type=='muram'):
 	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
-<<<<<<< HEAD
-=======
+
 
 elif (type=='muramt'):
 
@@ -153,13 +152,13 @@ elif (type=='muramt'):
 	atmout[4,:,:,:] = p * 0.05
 	atmout[9,:,:,:] = vz
 
-	Bz = snap.By[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
-	Bx = snap.Bx[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
-	By = snap.Bz[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1)
+	Bz = snap.By[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1) * np.sqrt(4.0*np.pi)
+	Bx = snap.Bx[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1) * np.sqrt(4.0*np.pi)
+	By = snap.Bz[xmin:xmax:skip, zmin:zmax, ymin:ymax:skip].transpose(0,2,1) * np.sqrt(4.0*np.pi)
 	
-	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0) * np.sqrt(4.0*np.pi)
+	B = np.sqrt(Bx**2.0 + By**2.0 + Bz**2.0)
 	theta = np.arccos(Bz/(B+0.001))
-	phi = np.arctan(By/Bx)
+	phi = np.arctan2(By,Bx)
 
 	atmout[7,:,:,:] = B
 	atmout[10,:,:,:] = theta
@@ -168,4 +167,7 @@ elif (type=='muramt'):
 	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
->>>>>>> b27c7965e979557925d3b55ae87f6e73463eef8d
+
+else:
+        print ("Uknown file type. Exiting...")
+
