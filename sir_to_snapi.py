@@ -4,11 +4,11 @@ from astropy.io import fits
 import pyana
 import sys
 
-# Transforms a single atmospheric cube from cobold h5py format into f0 (pyana) snapi format
+# Transforms a single atmospheric cube from sir fits format into f0 (pyana) snapi format
 
-cobfile = sys.argv[1]
+sirfile = sys.argv[1]
 
-atmin = fits.open(cobfile)[0].data[:,:,:768,:768]
+atmin = fits.open(cobfile)[0].data[:,:,::2,::2]
 
 NP, NZ, NX, NY = atmin.shape
 
