@@ -19,10 +19,17 @@ print ("info :: dimensions are: ", NX, NY, NZ)
 atmout = np.zeros([12, NX, NY, NZ])
 
 atmout[0,:,:,:] = atmin.tau
+
+if (atmout[0,0,0,0] < 1E-5): # seems like tau is empty:
+	print("info::log tau seems to be not provided, initializing my own:")
+	atmout[0,:,:,:] = np.linspace(-8,2,NZ)[None,None,:]
 atmout[1,:,:,:] = atmin.z * 1E5
 atmout[2,:,:,:] = atmin.tem
 atmout[3,:,:,:] = atmin.pg
-atmout[4,:,:,:] = atmout[3,:,:,:] * 0.05
+atmout[4,:,:,:] = atmin.pel #atmout[3,:,:,:] * 0.05
+if (atmout[4,0,0,0] < 1E-5 * atmout[3,0,0,0]): # electron pressure actually zero:
+	print("info::electron pressure seems to be not provided, initializing my own:")
+	atmout[4,:,:,:] = atmout[3,:,:,:] * 0.05
 atmout[9,:,:,:] = atmin.vz
 
 # Polish temperatures
@@ -32,20 +39,26 @@ atmout[9,:,:,:] = atmin.vz
 
 B_mag = np.sqrt(atmin.bz**2.0 + atmin.bx**2.0 + atmin.by**2.0)
 theta = np.arccos(atmin.bz/(B_mag+0.1)) # make sure it's not dividing by zero
-phi   = np.arctan(atmin.by / atmin.bx)
+phi   = np.arctan2(atmin.by, atmin.bx)
 
 atmout[7,:,:,:] = B_mag
 atmout[10,:,:,:] = theta
 atmout[11,:,:,:] = phi
 
 # Gonna smooth out some stuff: 
-from scipy.ndimage import gaussian_filter
+smooth = int(sys.argv[3])
+if (smooth):
+	print("info::i am going to smooth the atmosphere..")
+	from scipy.ndimage import gaussian_filter
 
-atmout[3] = np.log10(atmout[3])
-for i in range(2,12):
-	atmout[i] = gaussian_filter(atmout[i],(1,1,1))
+	atmout[3] = np.log10(atmout[3])
+	for i in range(2,12):
+		atmout[i] = gaussian_filter(atmout[i],(1,1,1))
 
-atmout[9,:,:,:] = 0.0
-atmout[3] = 10.0 ** atmout[3]
+	atmout[9,:,:,:] = 0.0
+	atmout[3] = 10.0 ** atmout[3]
 
-pyana.fzwrite(sys.argv[2],atmout[:,:,:,::-1],0,'temp')
+if (NX==1 and NY==1):
+	np.savetxt(sys.argv[2], atmout[:,0,0,::-1].T, header=str(NZ)+" WHATWHAT", comments='', fmt="%1.6e")
+else:
+	pyana.fzwrite(sys.argv[2],atmout[:,:,:,::-1],0,'temp')

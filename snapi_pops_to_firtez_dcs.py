@@ -6,7 +6,7 @@ import firtez_dz as frz
 
 import sys
 
-def svd_compress(A,limit):
+def svd_compress(A,limit): # WIP
 	
 	U,s,V = np.linalg.svd(A,full_matrices=True)
 
@@ -29,7 +29,7 @@ departure coefficients that can be read by firtez. It is modeled after the make_
 f_lte = sys.argv[1]
 f_nlte = sys.argv[2]
 
-atmext = sys.argv[3] 
+atmext = sys.argv[3] # how to call the output finally
 
 # In principle one can devise the atmname from other names, but better give the guys a freedom
 
@@ -42,44 +42,56 @@ dc = popsnlte / popslte
 
 dc = dc[:,:,::-1,:]
 
-tags=['mg5173','ca8542','na5896']
-indexlo=[8,16,26]
-indexuo=[11,18,27]
+## Below is to be changed according to what you did (which atoms, what transitions, etc...)
+## ----------------------------------------------------------------------------------------
 
-indexln=[14,8,26]
-indexun=[17,10,27]
+tags=['na5890','na5896']
+indexln=[14,14]
+indexun=[15,16]
+
+indexl0=[14,14]
+indexu0=[15,16]
+
+## ----------------------------------------------------------------------------------------
 
 nlines = len(tags)
 
-
+print("info::total number of lines to model: ", nlines)
 
 ### Now some visualization:
 print(dc.shape)
-dcmean = np.mean(dc[:10,:10], axis=(0,1))
+NX = dc.shape[0]
+NY = dc.shape[1]
+dcmean = np.mean(dc, axis=(0,1))
 
-dcfalc = np.loadtxt(sys.argv[4], skiprows = 1)
 
-print ("info: the dimensions of the referent model atmosphere are:", dcfalc.shape)
+#dcfalc = np.loadtxt(sys.argv[4], skiprows = 1)
+
+#print ("info: the dimensions of the referent model atmosphere are:", dcfalc.shape)
 
 for i in range(0, nlines):
 
 	plt.figure(figsize=[7,14])
 	plt.subplot(311)
-	plt.semilogy(dcfalc[:, indexlo[i]], label='falc')
-	plt.semilogy(np.mean(dc[:2,:2], axis=(0,1))[:,indexln[i]], label='2x2')
-	plt.semilogy(np.mean(dc[:10,:10], axis=(0,1))[:,indexln[i]], label='10x10')
+	#plt.semilogy(dcfalc[:, indexlo[i]], label='falc')
+	if (NX > 1 and NY > 1):
+		plt.semilogy(np.mean(dc[:2,:2], axis=(0,1))[:,indexln[i]], label='2x2')
+	if (NX > 9 and NY > 9):
+		plt.semilogy(np.mean(dc[:10,:10], axis=(0,1))[:,indexln[i]], label='10x10')
 	plt.semilogy(dcmean[:, indexln[i]], label = 'mean')
 	plt.legend()
 
 	plt.subplot(312)
-	plt.semilogy(dcfalc[:, indexuo[i]], label='falc')
-	plt.semilogy(np.mean(dc[:2,:2], axis=(0,1))[:,indexun[i]], label='2x2')
-	plt.semilogy(np.mean(dc[:10,:10], axis=(0,1))[:,indexun[i]], label='10x10')
+	#plt.semilogy(dcfalc[:, indexuo[i]], label='falc')
+	if (NX > 1 and NY > 1):
+		plt.semilogy(np.mean(dc[:2,:2], axis=(0,1))[:,indexun[i]], label='2x2')
+	if (NX > 9 and NY > 9):
+		plt.semilogy(np.mean(dc[:10,:10], axis=(0,1))[:,indexun[i]], label='10x10')
 	plt.semilogy(dcmean[:, indexun[i]], label = 'mean')
 	plt.legend()
 
 	plt.subplot(313)
-	plt.plot(dcfalc[:, indexuo[i]]/dcfalc[:, indexlo[i]], label='falc')
+	#plt.plot(dcfalc[:, indexuo[i]]/dcfalc[:, indexlo[i]], label='falc')
 	plt.plot(dcmean[:, indexun[i]]/dcmean[:, indexln[i]], label='mean')
 	plt.legend()
 
@@ -106,63 +118,6 @@ for l in range(0, nlines):
 	betas[l,0,:,:,:] = dc[:,:,:, indexln[l]]
 	betas[l,1,:,:,:] = dc[:,:,:, indexun[l]]
 
-
-for l in range(0, 0):
-
-	for i in range(0,1):
-		for d in range(0,NZ):
-
-			#reconstruct
-			#kek = svd_compress(betas[l,i,:,:,d].T, 2E-3)
-
-			kek = betas[l,i,:,:,d]
-
-			coeffs = pywt.dwt2(kek,'db8')
-
-			#assign it to these mighty arrays
-			cA,(cH,cV,cD) = coeffs
-			#print cA.shape
-			#regularize
-			cH[:,:] = 0.0
-			cV[:,:] = 0.0
-			cD[:,:] = 0.0
-			#cA[47:57,:] = 0.0
-
-			#reconstruct
-			kek = pywt.idwt2(coeffs,'db8')
-
-			if (i == 0 and d == 96):
-
-				print("info::debug line about the dimensions", betas[l,i,:,:,d].shape)
-				print("info::debug line about the dimensions", kek.shape)
-
-				plt.figure(figsize=[12,8])
-				plt.subplot(221)
-				plt.imshow(betas[l,i,:30,:30,d].T, origin='lower', cmap='cividis')
-				plt.colorbar()
-				plt.subplot(222)
-				plt.imshow(kek[:30,:30].T, origin='lower', cmap='cividis')
-				plt.colorbar()
-
-				plt.subplot(223)
-				plt.imshow(betas[l,i,:,:,d].T, origin='lower', cmap='cividis')
-				plt.colorbar()
-				plt.subplot(224)
-				plt.imshow(kek[:,:].T, origin='lower', cmap='cividis')
-				plt.colorbar()
-				
-				plt.savefig('debug'+tags[l]+'.png', bbox_inches='tight')
-
-			betas[l,i,:,:,d] = kek[:-1,:]
-
-print("info::test line : ", betas.shape)
-
-# OK THIS DOES NOT WORK PROPERLY
-#small = np.where(betas < 1E-3)
-#betas[small] = 1E-3
-
-#big = np.where(betas > 1E3)
-#betas[big] = 1E3
 
 for l in range(0,nlines):
 
