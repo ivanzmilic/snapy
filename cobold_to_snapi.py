@@ -16,7 +16,7 @@ NX = len(atmin['x'])
 NY = len(atmin['y'])
 NZ = len(atmin['z'])
 
-print ("info :: dimensions are: ", NX, NY, NZ)
+print ("info :: original dimensions are: ", NX, NY, NZ)
 
 atmout = np.zeros([12, NX, NY, NZ])
 
@@ -29,10 +29,16 @@ atmout[9,:,:,:] = atmin['vz'][:,:,:].transpose(2,1,0)
 
 B_mag = np.sqrt(atmin['bz'][:,:,:]**2.0 + atmin['bx'][:,:,:]**2.0 + atmin['by'][:,:,:]**2.0)
 theta = np.arccos(atmin['bz'][:,:,:]/(B_mag[:,:,:]+0.1)) # make sure it's not dividing by zero
-phi   = np.arctan(atmin['by'][:,:,:] / atmin['bx'][:,:,:])
+phi   = np.arctan2(atmin['by'][:,:,:], atmin['bx'][:,:,:])
 
 atmout[7,:,:,:] = B_mag.transpose(2,1,0)
 atmout[10,:,:,:] = theta.transpose(2,1,0)
 atmout[11,:,:,:] = phi.transpose(2,1,0)
+
+# Hardcode cut in z, fix later:
+
+atmout = atmout[:,::2,::2,105:]
+
+print ("info :: final dimensions are: ", atmout.shape)
 
 pyana.fzwrite(sys.argv[2],atmout[:,:,:,::-1],0,'temp')
