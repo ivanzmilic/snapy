@@ -20,7 +20,7 @@ atmout = np.zeros([12, NX, NY, NZ])
 
 atmout[0,:,:,:] = atmin.tau
 
-if (atmout[0,0,0,0] < 1E-5): # seems like tau is empty:
+if (atmout[0,0,0,0] < 1E-8): # seems like tau is empty:
 	print("info::log tau seems to be not provided, initializing my own:")
 	atmout[0,:,:,:] = np.linspace(-8,2,NZ)[None,None,:]
 atmout[1,:,:,:] = atmin.z * 1E5
@@ -47,8 +47,8 @@ atmout[11,:,:,:] = phi
 
 # Gonna smooth out some stuff: 
 smooth = int(sys.argv[3])
-if (smooth):
-	print("info::i am going to smooth the atmosphere..")
+if (smooth == 1):
+	print("info::i am going to smooth the atmosphere in all three dimensions")
 	from scipy.ndimage import gaussian_filter
 
 	atmout[3] = np.log10(atmout[3])
@@ -58,7 +58,31 @@ if (smooth):
 	atmout[9,:,:,:] = 0.0
 	atmout[3] = 10.0 ** atmout[3]
 
+if (smooth == 2):
+	print("info::i am going to smooth the atmosphere in x and y")
+	from scipy.ndimage import gaussian_filter
+
+	atmout[3] = np.log10(atmout[3])
+	for i in range(2,12):
+		atmout[i] = gaussian_filter(atmout[i],(1,1,0))
+
+	atmout[9,:,:,:] = 0.0
+	atmout[3] = 10.0 ** atmout[3]
+
+if (smooth == 3):
+	print("info::i am going to smooth the atmosphere in z")
+	from scipy.ndimage import gaussian_filter
+
+	atmout[3] = np.log10(atmout[3])
+	for i in range(2,12):
+		atmout[i] = gaussian_filter(atmout[i],(0,0,1))
+
+	atmout[9,:,:,:] = 0.0
+	atmout[3] = 10.0 ** atmout[3]
+
+print("info::smoothing finished. now going to write...")
+
 if (NX==1 and NY==1):
 	np.savetxt(sys.argv[2], atmout[:,0,0,::-1].T, header=str(NZ)+" WHATWHAT", comments='', fmt="%1.6e")
 else:
-	pyana.fzwrite(sys.argv[2],atmout[:,:,:,::-1],0,'temp')
+	pyana.fzwrite(sys.argv[2],atmout[:,::3,::3,::-1],0,'temp')
