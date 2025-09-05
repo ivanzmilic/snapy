@@ -41,16 +41,25 @@ print("info::the dimensions of the population cubes are:", popslte.shape)
 dc = popsnlte / popslte
 
 dc = dc[:,:,::-1,:]
+del(popslte)
+del(popsnlte)
 
 ## Below is to be changed according to what you did (which atoms, what transitions, etc...)
 ## ----------------------------------------------------------------------------------------
 
-tags=['na5890','na5896']
-indexln=[14,14]
-indexun=[15,16]
+# Both sodium lines:
+#tags=['na5890','na5896']
+#indexln=[14,14]
+#indexun=[15,16]
 
-indexl0=[14,14]
-indexu0=[15,16]
+# 4-line setup for SST/CRISP (5172 + 5890 + 6302 + 8542)
+tags = ['mg5172', 'ca8542', 'na5896']
+indexln=[9,16,20]
+indexun=[11,18,21]
+
+
+#indexl0=[14,14]
+#indexu0=[15,16]
 
 ## ----------------------------------------------------------------------------------------
 
@@ -99,15 +108,36 @@ for i in range(0, nlines):
 	plt.savefig(tags[i]+'_plot.png', bbox_inches='tight')
 	plt.close("all")
 
+	# 2D plots of departure coefficients
+
+	d_to_plot = (12,36,60,84)
+	NDP = len(d_to_plot)
+
+	plt.figure(figsize=[10.0,17])
+	pltindex = 1
+
+	for d in d_to_plot:
+
+		plt.subplot(NDP,2,pltindex)
+
+		plt.imshow(np.log10(dc[:,:,d,indexln[i]].T), origin='lower', cmap='cividis')
+		plt.colorbar()
+
+		pltindex+=1
+
+		plt.subplot(NDP,2,pltindex)
+
+		plt.imshow(np.log10(dc[:,:,d,indexun[i]].T), origin='lower', cmap='cividis')
+		plt.colorbar()
+
+		pltindex+=1
+
+	plt.savefig(tags[i]+'_maps_plot.png', bbox_inches='tight')	
+		
 # --------------------------------------------------------------------------------------------------------------
 # define betas and come up with filters to smoothen things nicely:
 
-import numpy as np
-import pywt
-import sys
-import skimage
-
-from skimage.restoration import (denoise_wavelet, estimate_sigma)
+expansion = int(sys.argv[4])
 
 NX,NY,NZ = dc[:,:,:,0].shape
 
@@ -118,6 +148,9 @@ for l in range(0, nlines):
 	betas[l,0,:,:,:] = dc[:,:,:, indexln[l]]
 	betas[l,1,:,:,:] = dc[:,:,:, indexun[l]]
 
+import scipy.ndimage as nd
+
+# Median filter the data:
 
 for l in range(0,nlines):
 
@@ -128,6 +161,120 @@ for l in range(0,nlines):
 	testbetafname = 'beta_' + tags[l] + atmext + '_1col.bin'
 
 	frz.write_beta_atom(testbetafname, betas[l,0,0,0].reshape(1,1,-1), betas[l,1,0,0].reshape(1,1,-1))
+
+print ("info::we output the original betas for the specified lines")
+print ("info::everything seems to be fine, but please check the 1D file")
+
+betasm = np.copy(betas)
+
+betasm = nd.median_filter(betas, 3, axes=(2,3))
+
+del(betas)
+del(dc)
+
+print("info::the data was median filtered ", nlines)
+
+
+for l in range(0, nlines):
+	
+	d_to_plot = (12,36,60,84)
+	NDP = len(d_to_plot)
+
+	plt.figure(figsize=[10.0,17])
+	pltindex = 1
+	for d in d_to_plot:
+
+		plt.subplot(NDP,2,pltindex)
+
+		plt.imshow(np.log10(betasm[l,0,:,:,d].T), origin='lower', cmap='cividis')
+		plt.colorbar()
+
+		pltindex+=1
+
+		plt.subplot(NDP,2,pltindex)
+
+		plt.imshow(np.log10(betasm[l,1,:,:,d].T), origin='lower', cmap='cividis')
+		plt.colorbar()
+
+		pltindex+=1
+
+
+	plt.savefig(tags[l]+'_maps_filtered_plot.png', bbox_inches='tight')	
+	plt.close('all')
+
+from scipy.interpolate import RegularGridInterpolator
+
+if (expansion):
+
+	# Extrapolate the cube on the desired size
+	# Also median filter to remove outliers
+
+	NX_full = 1358
+	NY_full = 1321
+
+	x_old = np.arange(NX) * 4.0
+	y_old = np.arange(NY) * 4.0
+	z_old = np.arange(NZ)
+
+	x_new = np.arange(NX_full)
+	y_new = np.arange(NY_full)
+	z_new = z_old
+
+	X,Y = np.meshgrid(x_new, y_new)
+
+	betasl = np.zeros([nlines, 2, NX_full, NY_full, NZ])
+
+	for l in range (0,nlines):
+
+		for d in range(0,NZ):
+
+			f = RegularGridInterpolator((x_old,y_old),betasm[l,0,:,:,d],bounds_error=False, fill_value=None)
+			betasl[l,0,:,:,d] = f((X,Y)).T
+		
+			f = RegularGridInterpolator((x_old,y_old),betasm[l,1,:,:,d],bounds_error=False, fill_value=None)
+			betasl[l,1,:,:,d] = f((X,Y)).T
+
+			print ('Interpolated for depth = ', d)
+
+
+		
+		d_to_plot = (12,36,60,84)
+		NDP = len(d_to_plot)
+
+		plt.figure(figsize=[10.0,17])
+		pltindex = 1
+		for d in d_to_plot:
+
+			plt.subplot(NDP,2,pltindex)
+
+			plt.imshow(np.log10(betasl[l,0,:,:,d].T), origin='lower', cmap='cividis')
+			plt.colorbar()
+
+			pltindex+=1
+
+			plt.subplot(NDP,2,pltindex)
+
+			plt.imshow(np.log10(betasl[l,1,:,:,d].T), origin='lower', cmap='cividis')
+			plt.colorbar()
+
+			pltindex+=1
+
+
+		plt.savefig(tags[l]+'_maps_filtered_expanded_plot.png', bbox_inches='tight')	
+		plt.close('all')
+
+
+
+for l in range(0,nlines):
+
+	betafname = 'beta_full_' + tags[l] + '_'+ atmext + '.bin'
+
+	frz.write_beta_atom(betafname, betasl[l,0], betasl[l,1])
+
+	#testbetafname = 'beta_full_' + tags[l] + atmext + '_1col.bin'
+
+	#frz.write_beta_atom(testbetafname, betasl[l,0,0,0].reshape(1,1,-1), betasl[l,1,0,0].reshape(1,1,-1))
+
 
 print ("info::everything seems to be fine, but please check the 1D file")
 
