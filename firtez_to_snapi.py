@@ -30,7 +30,8 @@ atmout[4,:,:,:] = atmin.pel #atmout[3,:,:,:] * 0.05
 if (atmout[4,0,0,0] < 1E-5 * atmout[3,0,0,0]): # electron pressure actually zero:
 	print("info::electron pressure seems to be not provided, initializing my own:")
 	atmout[4,:,:,:] = atmout[3,:,:,:] * 0.05
-atmout[9,:,:,:] = atmin.vz
+atmout[8,:,:,:] = np.sqrt(atmin.vmic)
+atmout[9,:,:,:] = atmin.vz * 0.0
 
 # Polish temperatures
 
@@ -75,14 +76,16 @@ if (smooth == 3):
 
 	atmout[3] = np.log10(atmout[3])
 	for i in range(2,12):
-		atmout[i] = gaussian_filter(atmout[i],(0,0,1))
+		atmout[i] = gaussian_filter(atmout[i],(0,0,2))
 
 	atmout[9,:,:,:] = 0.0
 	atmout[3] = 10.0 ** atmout[3]
 
 print("info::smoothing finished. now going to write...")
 
+skip_xy = int(sys.argv[4])
+
 if (NX==1 and NY==1):
 	np.savetxt(sys.argv[2], atmout[:,0,0,::-1].T, header=str(NZ)+" WHATWHAT", comments='', fmt="%1.6e")
 else:
-	pyana.fzwrite(sys.argv[2],atmout[:,::3,::3,::-1],0,'temp')
+	pyana.fzwrite(sys.argv[2],atmout[:,::skip_xy,::skip_xy,::-1],0,'temp')
