@@ -45,4 +45,7 @@ atmout[7,:,:,:] = 0.0
 atmout[10,:,:,:] = 0.1
 atmout[11,:,:,:] = 0.1
 
+# final shape:
+print("info::final atmosphere shape is : ", atmout.shape)
+
 pyana.fzwrite(sys.argv[2],atmout[:,:,:,::-1],0,'temp')

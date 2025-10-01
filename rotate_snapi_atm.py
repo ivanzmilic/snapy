@@ -3,6 +3,7 @@ import pyana
 from astropy.io import fits 
 import sys
 from scipy.interpolate import RegularGridInterpolator
+from tqdm import tqdm
 
 # The goal is to rotate, accurately, a 3D atmosphere. x,y do not matter so we do it y,z plane at a time.
 
@@ -70,7 +71,7 @@ cubein[4,:,:,:] = np.log10(cubein[4,:,:,:])
 
 for p in range(2,NP): # these are the only ones you are interpolating
 
-	interpolator = RegularGridInterpolator((x,y,z), cubein[p], solver='cubic')
+	interpolator = RegularGridInterpolator((x,y,z), cubein[p])
 
 	print ("info::now interpolating quantity :",p)
 	for i in tqdm(range(0,NX)):
@@ -111,7 +112,7 @@ for p in range(2,NP): # these are the only ones you are interpolating
 cube_tilted[3,:,:,:] = 10.0 ** cube_tilted[3,:,:,:]
 cube_tilted[4,:,:,:] = 10.0 ** cube_tilted[4,:,:,:]
 
-pyana.fzrwrite("debug.f0", cube_tilted, 0, 'bla')
+pyana.fzwrite("debug.f0", cube_tilted, 0, 'bla')
 
 
 

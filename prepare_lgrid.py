@@ -14,9 +14,9 @@ ll = np.linspace(ll0 - llrange*0.5, ll0 + llrange*0.5, NL)
 lgrid = ll
 
 # Mg I  b 
-'''
+
 ll0 = 5172.0
-llrange = 10.0
+llrange = 5.0
 Deltall = 0.01
 NL = int(llrange / Deltall) + 1
 
@@ -25,7 +25,7 @@ ll = np.linspace(ll0 - llrange*0.5, ll0 + llrange*0.5, NL)
 lgrid = np.append(lgrid, ll)
 
 # Fe 5250 
-'''
+
 ll0 = 5250.2
 llrange = 2.0
 Deltall = 0.01
