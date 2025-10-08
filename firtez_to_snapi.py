@@ -76,7 +76,7 @@ if (smooth == 3):
 
 	atmout[3] = np.log10(atmout[3])
 	for i in range(2,12):
-		atmout[i] = gaussian_filter(atmout[i],(0,0,2))
+		atmout[i] = gaussian_filter(atmout[i],(0,0,1))
 
 	atmout[9,:,:,:] = 0.0
 	atmout[3] = 10.0 ** atmout[3]
