@@ -70,19 +70,29 @@ print (nsnaps)
 print (time[1,:])
 
 # Then we can read the timeseries of specific 2D slices, for instance, the horizontal velocity v_x at the photosphere (tau=1) is in the file:
-# NOTE THAT I READ VY, because old MURaM notation is still here
-# Again, contrarty to some other runs, here the ordering in 3D should be z, y , x
-# Here I assume that you call x is your variable that is contained in the outer loop i.e. slower index
-vx_tau1 = np.memmap(path2D+'Pore_10Mm_6x6km_res_Bz400G_tau_1.000_vz_012000_to_044450.dat',dtype=np.float32,mode='r',shape=(nsnaps,nx,ny))
-print(vx_tau1.shape)
+vx_tau1 = np.memmap(path2D+'Pore_10Mm_6x6km_res_Bz400G_tau_1.000_vy_012000_to_044450.dat',dtype=np.float32,mode='r',shape=(nsnaps,nx,ny))
+# Like in the most of the runs, both the arrangement on indices and the vector notation is swapped, so:
+# What MURAM calls v_y is actually v_x
+# What MURAM calls v_x is actually v_z (vertical)
+# What MURAM calls v_z is actually v_y
+# Here I assume what you call x is your variable that is contained in the outer loop i.e. slower index, so:
+# vx[i,j] -> i corresponds to x and j to y
+# For this to make sense, you have to imshow the array with origin='lower', and TRANSPOSED. This is because imshow
+# plots images like matrices (first index is which row, second index is which column), and starts from the top.
+# So we have:
 
-# Plotting here just to debug:
+print(vx_tau1.shape)
+# Plotting here just to make sure:
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 plt.figure(figsize= (12.0,10))
-plt.imshow(vx_tau1[10,:,:]/1E5,cmap='bwr',vmin=-5,vmax=5,origin='lower')
+plt.imshow(vx_tau1[10,:,:].T/1E5,cmap='bwr',vmin=-5,vmax=5,origin='lower')
 plt.tight_layout()
-plt.colorbar(label='v_x [km/s]')    
-plt.savefig('vx_tau1.png',dpi=150)
+plt.colorbar(label='v_x [km/s]')  
+plt.tight_layout()  
+plt.savefig('vx_tau1.png',dpi=150, bbox_inches='tight')
+
 plt.close()
+
+# When you look at this v_x should be aligned along the x axis, which given granular velocities makes sense.
