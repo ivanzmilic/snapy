@@ -53,9 +53,9 @@ del(popsnlte)
 #indexun=[15,16]
 
 # 4-line setup for SST/CRISP (5172 + 5890 + 6302 + 8542)
-tags = ['mg5172', 'ca8542', 'na5896']
-indexln=[9,16,20]
-indexun=[11,18,21]
+tags = ['mg5172', 'na5896','ca8542']
+indexln=[6,12,26]
+indexun=[9,13,28]
 
 
 #indexl0=[14,14]
@@ -148,9 +148,6 @@ for l in range(0, nlines):
 	betas[l,0,:,:,:] = dc[:,:,:, indexln[l]]
 	betas[l,1,:,:,:] = dc[:,:,:, indexun[l]]
 
-import scipy.ndimage as nd
-
-# Median filter the data:
 
 for l in range(0,nlines):
 
@@ -158,16 +155,42 @@ for l in range(0,nlines):
 
 	frz.write_beta_atom(betafname, betas[l,0], betas[l,1])
 
-	testbetafname = 'beta_' + tags[l] + atmext + '_1col.bin'
+	#testbetafname = 'beta_' + tags[l] + atmext + '_1col.bin'
 
-	frz.write_beta_atom(testbetafname, betas[l,0,0,0].reshape(1,1,-1), betas[l,1,0,0].reshape(1,1,-1))
+	#frz.write_beta_atom(testbetafname, betas[l,0,0,0].reshape(1,1,-1), betas[l,1,0,0].reshape(1,1,-1))
 
 print ("info::we output the original betas for the specified lines")
 print ("info::everything seems to be fine, but please check the 1D file")
 
+# smoothing:
+tosmooth = int(sys.argv[5])
+
+if (not tosmooth):
+	exit();
+
+import scipy.signal as sgl
+# Median filter the data:
+
 betasm = np.copy(betas)
 
-betasm = nd.median_filter(betas, 3, axes=(2,3))
+for l in range(0, nlines):
+	for i in range(0,2):
+		for d in range(0,NZ):
+			betasm[l,i,:,:,d] = sgl.medfilt2d(betas[l,i,:,:,d], kernel_size=tosmooth)
+
+for l in range(0,nlines):
+
+	betafname = 'beta_smoothed_' + tags[l] + '_'+ atmext + '.bin'
+
+	frz.write_beta_atom(betafname, betasm[l,0], betasm[l,1])
+
+	#testbetafname = 'beta_smoothed_' + tags[l] + atmext + '_1col.bin'
+
+	#frz.write_beta_atom(testbetafname, betasm[l,0,0,0].reshape(1,1,-1), betasm[l,1,0,0].reshape(1,1,-1))
+
+print ("info::we output the original betas for the specified lines")
+print ("info::everything seems to be fine, but please check the 1D file")
+
 
 del(betas)
 del(dc)
@@ -204,64 +227,65 @@ for l in range(0, nlines):
 
 from scipy.interpolate import RegularGridInterpolator
 
-if (expansion):
+if (not expansion):
+	exit()
 
-	# Extrapolate the cube on the desired size
-	# Also median filter to remove outliers
+# Extrapolate the cube on the desired size
+# Also median filter to remove outliers
 
-	NX_full = 1358
-	NY_full = 1321
+NX_full = 1358
+NY_full = 1321
 
-	x_old = np.arange(NX) * 4.0
-	y_old = np.arange(NY) * 4.0
-	z_old = np.arange(NZ)
+x_old = np.arange(NX) * 4.0
+y_old = np.arange(NY) * 4.0
+z_old = np.arange(NZ)
 
-	x_new = np.arange(NX_full)
-	y_new = np.arange(NY_full)
-	z_new = z_old
+x_new = np.arange(NX_full)
+y_new = np.arange(NY_full)
+z_new = z_old
 
-	X,Y = np.meshgrid(x_new, y_new)
+X,Y = np.meshgrid(x_new, y_new)
 
-	betasl = np.zeros([nlines, 2, NX_full, NY_full, NZ])
+betasl = np.zeros([nlines, 2, NX_full, NY_full, NZ])
 
-	for l in range (0,nlines):
+for l in range (0,nlines):
 
-		for d in range(0,NZ):
+	for d in range(0,NZ):
 
-			f = RegularGridInterpolator((x_old,y_old),betasm[l,0,:,:,d],bounds_error=False, fill_value=None)
-			betasl[l,0,:,:,d] = f((X,Y)).T
+		f = RegularGridInterpolator((x_old,y_old),betasm[l,0,:,:,d],bounds_error=False, fill_value=None)
+		betasl[l,0,:,:,d] = f((X,Y)).T
 		
-			f = RegularGridInterpolator((x_old,y_old),betasm[l,1,:,:,d],bounds_error=False, fill_value=None)
-			betasl[l,1,:,:,d] = f((X,Y)).T
+		f = RegularGridInterpolator((x_old,y_old),betasm[l,1,:,:,d],bounds_error=False, fill_value=None)
+		betasl[l,1,:,:,d] = f((X,Y)).T
 
-			print ('Interpolated for depth = ', d)
+		print ('Interpolated for depth = ', d)
 
 
 		
-		d_to_plot = (12,36,60,84)
-		NDP = len(d_to_plot)
+	d_to_plot = (12,36,60,84)
+	NDP = len(d_to_plot)
 
-		plt.figure(figsize=[10.0,17])
-		pltindex = 1
-		for d in d_to_plot:
+	plt.figure(figsize=[10.0,17])
+	pltindex = 1
+	for d in d_to_plot:
 
-			plt.subplot(NDP,2,pltindex)
+		plt.subplot(NDP,2,pltindex)
 
-			plt.imshow(np.log10(betasl[l,0,:,:,d].T), origin='lower', cmap='cividis')
-			plt.colorbar()
+		plt.imshow(np.log10(betasl[l,0,:,:,d].T), origin='lower', cmap='cividis')
+		plt.colorbar()
 
-			pltindex+=1
+		pltindex+=1
 
-			plt.subplot(NDP,2,pltindex)
+		plt.subplot(NDP,2,pltindex)
 
-			plt.imshow(np.log10(betasl[l,1,:,:,d].T), origin='lower', cmap='cividis')
-			plt.colorbar()
+		plt.imshow(np.log10(betasl[l,1,:,:,d].T), origin='lower', cmap='cividis')
+		plt.colorbar()
 
-			pltindex+=1
+		pltindex+=1
 
 
-		plt.savefig(tags[l]+'_maps_filtered_expanded_plot.png', bbox_inches='tight')	
-		plt.close('all')
+	plt.savefig(tags[l]+'_maps_filtered_expanded_plot.png', bbox_inches='tight')	
+	plt.close('all')
 
 
 
