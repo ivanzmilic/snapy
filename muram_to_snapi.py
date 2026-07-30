@@ -8,7 +8,6 @@ import muram as mio
 
 path = sys.argv[1]
 n_iter = int(sys.argv[2])
-type = sys.argv[10]
 
 xmin = int(sys.argv[3])
 xmax = int(sys.argv[4])
@@ -17,6 +16,10 @@ ymax = int(sys.argv[6])
 zmin = int(sys.argv[7])
 zmax = int(sys.argv[8])
 skip = int(sys.argv[9])
+zstep = float(sys.argv[10])*1e5 # convert km to cm
+
+type = sys.argv[11]
+gen_name = sys.argv[12]
 
 if (type=='muramsub'):
 
@@ -88,7 +91,7 @@ elif (type=='muram'):
 	Tc = np.copy(T)
 	Tc[np.where(T<3200.0)] = 3200.0
 	#Tc[np.where(T>50000.0)] = 50000.0
-	z = np.arange(zmax-zmin) * 16E5
+	z = np.arange(zmax-zmin) * zstep
 	tau = np.linspace(-6,2,NZ)
 	p = snap.Pres[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
 	vz = snap.vx[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
@@ -112,7 +115,7 @@ elif (type=='muram'):
 	atmout[10,:,:,:] = theta
 	atmout[11,:,:,:] = phi
 
-	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
+	outputname = path + gen_name + '_' + str(n_iter)+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
 
@@ -164,7 +167,7 @@ elif (type=='muramt'):
 	atmout[10,:,:,:] = theta
 	atmout[11,:,:,:] = phi
 
-	outputname = sys.argv[11] + '_' + sys.argv[2]+ '.f0'
+	outputname = sys.argv[11] + '_' + str(n_iter)+ '.f0'
 
 	pyana.fzwrite(outputname, atmout[:,:,:,::-1],0,'bla')	
 

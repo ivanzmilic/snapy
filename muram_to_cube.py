@@ -68,7 +68,7 @@ atmout[8,:,:,:] = Bz
 
 genname = sys.argv[11]
 
-outputname = path + '/' + genname + '_' + sys.argv[2]+ '.npy'
+outputname = path + genname + '_' + str(n_iter) + '.npy'
 
 atmout = atmout.astype(np.float32)
 
