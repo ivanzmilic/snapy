@@ -44,11 +44,12 @@ print ("info :: output dimensions are: ", NX, NY, NZ)
 
 # We want T, p, vx, vy, vz, Bx, By, Bz
 
-atmout = np.zeros([9,NX,NY,NZ])
+atmout = np.zeros([10,NX,NY,NZ])
 Tc = np.copy(T)
 	
 p = snap.Pres[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
 rho = snap.rho[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
+ne = snap.ne[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
 vz = snap.vx[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
 vx = snap.vy[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
 vy = snap.vz[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0)
@@ -59,12 +60,13 @@ By = snap.Bz[zmin:zmax, xmin:xmax:skip, ymin:ymax:skip].transpose(1,2,0) * np.sq
 atmout[0,:,:,:] = Tc
 atmout[1,:,:,:] = p
 atmout[2,:,:,:] = rho
-atmout[3,:,:,:] = vx
-atmout[4,:,:,:] = vy
-atmout[5,:,:,:] = vz
-atmout[6,:,:,:] = Bx
-atmout[7,:,:,:] = By
-atmout[8,:,:,:] = Bz
+atmout[3,:,:,:] = ne
+atmout[4,:,:,:] = vx
+atmout[5,:,:,:] = vy
+atmout[6,:,:,:] = vz
+atmout[7,:,:,:] = Bx
+atmout[8,:,:,:] = By
+atmout[9,:,:,:] = Bz
 
 genname = sys.argv[11]
 
